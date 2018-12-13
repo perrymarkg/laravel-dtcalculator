@@ -1,0 +1,11 @@
+{
+    "name": "prymag/dtcalculator",
+    "description": "Date/Time Calculator",
+    "authors": [
+        {
+            "name": "Perry",
+            "email": "pmgd2nd@gmail.com"
+        }
+    ],
+    "require": {}
+}
