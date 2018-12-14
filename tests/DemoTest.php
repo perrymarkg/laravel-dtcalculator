@@ -86,7 +86,7 @@ class DemoTest extends TestCase
         $this->assertEquals('2019-01-01 12:30 PM', $str);
     }
 
-    public function testcanSkipWorkingDaysAndSkipDates()
+    public function testCanSkipWorkingDaysAndSkipDates()
     {
         $date = \Carbon\Carbon::create(2018, 12, 25, 5, 26);
 
@@ -98,6 +98,7 @@ class DemoTest extends TestCase
             \Carbon\Carbon::create(2018, 12, 31),
             \Carbon\Carbon::create(2018, 12, 2),
             \Carbon\Carbon::create(2018, 12, 3),
+            \Carbon\Carbon::create(2019, 01, 3),
         ]);
 
         $working_days = collect([
@@ -107,7 +108,7 @@ class DemoTest extends TestCase
             '3' => ['enabled' => true, 'start' => '08:30', 'end' => '14:30'], // Wednesday
             '4' => ['enabled' => true, 'start' => '08:30', 'end' => '14:30'], // Thursday
             '5' => ['enabled' => true, 'start' => '08:30', 'end' => '14:30'], // Friday
-            '6' => ['enabled' => true, 'start' => '08:30', 'end' => '14:30'], // Saturday
+            '6' => ['enabled' => false, 'start' => '08:30', 'end' => '14:30'], // Saturday
         ]);
 
         $result = $this->dt_calculator
@@ -120,6 +121,81 @@ class DemoTest extends TestCase
 
         $str = $result->format('Y-m-d h:i A');
         
-        $this->assertEquals($str, '2018-09-01 03:23 AM');
+        $this->assertEquals('2019-01-04 08:30 AM', $str);
     }
+
+    public function testCanAddMinutes()
+    {
+        $date = \Carbon\Carbon::create(2018, 12, 25, 5, 26);
+
+        $result = $this->dt_calculator
+            ->setDate($date)
+            ->add(43)
+            ->minutes()
+            ->compute();
+
+        $this->assertEquals('2018-12-25 06:09 AM', $result->format('Y-m-d H:i A'));
+    }
+
+    public function testCanAddMinutesAndSkipDates()
+    {
+        $date = \Carbon\Carbon::create(2018, 12, 25, 23, 55);
+
+        $dates = collect([
+            \Carbon\Carbon::create(2018, 12, 28),
+            \Carbon\Carbon::create(2018, 12, 26),
+            \Carbon\Carbon::create(2018, 12, 25),
+            \Carbon\Carbon::create(2018, 12, 31),
+            \Carbon\Carbon::create(2018, 12, 2),
+            \Carbon\Carbon::create(2018, 12, 3),
+            \Carbon\Carbon::create(2019, 01, 3),
+        ]);
+
+        $result = $this->dt_calculator
+            ->setDate($date)
+            ->skipDates($dates)
+            ->add(20)
+            ->minutes()
+            ->compute();
+
+        $this->assertEquals('2018-12-27 00:20 AM', $result->format('Y-m-d H:i A'));
+    }
+
+    public function testCanAddHours()
+    {
+        $date = \Carbon\Carbon::create(2018, 12, 25, 5, 26);
+
+        $result = $this->dt_calculator
+            ->setDate($date)
+            ->add(24)
+            ->hours()
+            ->compute();
+
+        $this->assertEquals('2018-12-26 05:26 AM', $result->format('Y-m-d H:i A'));
+    }
+
+    public function testCanAddHoursAndSkipDates()
+    {
+        $date = \Carbon\Carbon::create(2018, 12, 25, 23, 55);
+
+        $dates = collect([
+            \Carbon\Carbon::create(2018, 12, 28),
+            \Carbon\Carbon::create(2018, 12, 26),
+            \Carbon\Carbon::create(2018, 12, 25),
+            \Carbon\Carbon::create(2018, 12, 31),
+            \Carbon\Carbon::create(2018, 12, 2),
+            \Carbon\Carbon::create(2018, 12, 3),
+            \Carbon\Carbon::create(2019, 01, 3),
+        ]);
+
+        $result = $this->dt_calculator
+            ->setDate($date)
+            ->skipDates($dates)
+            ->add(20)
+            ->hours()
+            ->compute();
+
+        $this->assertEquals('2018-12-27 20:55 PM', $result->format('Y-m-d H:i A'));
+    }
+
 }

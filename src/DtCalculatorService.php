@@ -56,11 +56,17 @@ class DtCalculatorService {
 
     public function getStartDate()
     {
-        // Always start at the next day for the start
-        return $this->start_date
-            ->copy()
-            ->addDay()
-            ->startOfDay();
+        if ($this->interval == 'minutes') {
+            return $this->start_date
+                ->copy()
+                ->startOfDay();
+        } else {
+            // Always start at the next day for the start
+            return $this->start_date
+                ->copy()
+                ->addDay()
+                ->startOfDay();
+        }
     }
 
     public function getEndDate()
@@ -144,19 +150,35 @@ class DtCalculatorService {
         $start = $this->getStartDate();
         $end = $this->getEndDate();
         
-        $periods = \Carbon\CarbonPeriod::create($start, '1 day', $end);
-        
-        $ctr = 0;
-        foreach ($periods as $date) {
-            if ($this->isDateSkippable($date)) {
-                $ctr++;
+        if ($this->interval == 'days') {
+            $periods = \Carbon\CarbonPeriod::create($start, '1 day', $end);
+            $ctr = 0;
+            foreach ($periods as $date) {
+                if ($this->isDateSkippable($date)) {
+                    $ctr++;
+                }
             }
-        }
-        
-        if ($ctr) {
-            $this->int = $ctr;
-            $this->start_date = $this->the_date->copy();
-            $this->compute();
+            
+            if ($ctr) {
+                $this->int = $ctr;
+                $this->start_date = $this->the_date->copy();
+                $this->compute();
+            }
+        } else {
+            
+            if ($this->isDateSkippable($this->the_date->copy())) {
+                $this->the_date->addDay();
+
+                if ($this->interval == 'minutes') {
+                    $this->the_date->setTime(0,0,0);
+                }
+
+                if ($this->interval == 'hours') {
+                    $this->the_date->setTime(0, $this->start_date->format('i'), 0);
+                }
+                
+                $this->compute();
+            }
         }
     }
 
@@ -172,10 +194,7 @@ class DtCalculatorService {
                 $start_day = $skip_date->copy()->startOfDay();
                 $end_day = $skip_date->copy()->endOfDay();
                 //
-                if (
-                    $date->greaterThanOrEqualTo($start_day) &&
-                    $date->lessThanOrEqualTo($end_day)
-                ) {
+                if ($date->format('m-d') === $skip_date->format('m-d')) {
                     return true;
                     break;
                 }
