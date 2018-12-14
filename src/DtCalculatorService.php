@@ -165,7 +165,7 @@ class DtCalculatorService {
                 $this->compute();
             }
         } else {
-            
+            dd($this->start_date, $this->the_date);
             if ($this->isDateSkippable($this->the_date->copy())) {
                 $this->the_date->addDay();
 

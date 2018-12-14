@@ -137,6 +137,31 @@ class DemoTest extends TestCase
         $this->assertEquals('2018-12-25 06:09 AM', $result->format('Y-m-d H:i A'));
     }
 
+    public function testCanAddMinutesAndSkipWorkingDays()
+    {
+        $date = \Carbon\Carbon::create(2018, 12, 14, 15, 23);
+
+        $working_days = collect([
+            '0' => ['enabled' => false, 'start' => '08:30', 'end' => '14:30'], // Sunday
+            '1' => ['enabled' => true, 'start' => '08:30', 'end' => '14:30'], // Monday
+            '2' => ['enabled' => true, 'start' => '12:30', 'end' => '14:30'], // Tuesday
+            '3' => ['enabled' => false, 'start' => '08:30', 'end' => '14:30'], // Wednesday
+            '4' => ['enabled' => false, 'start' => '08:30', 'end' => '14:30'], // Thursday
+            '5' => ['enabled' => false, 'start' => '09:30', 'end' => '14:30'], // Friday
+            '6' => ['enabled' => false, 'start' => '08:30', 'end' => '14:30'], // Saturday
+        ]);
+
+        $result = $this->dt_calculator
+            ->setDate($date)
+            ->setWorkingDays($working_days)
+            ->add(7)
+            ->minutes()
+            ->compute();
+
+        $str = $result->format('Y-m-d h:i A');
+        $this->assertEquals('2019-01-01 12:30 PM', $str);
+    }
+
     public function testCanAddMinutesAndSkipDates()
     {
         $date = \Carbon\Carbon::create(2018, 12, 25, 23, 55);
